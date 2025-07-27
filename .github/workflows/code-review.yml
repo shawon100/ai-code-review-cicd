@@ -32,7 +32,7 @@ jobs:
         id: model
         with:
           model: deepseek-r1:latest
-          prompt: "You are a Technical Debt auditor. Analysis the code and pipelines in this ${{github.workspace}} folder and Generate a HTML  index.html file for this repo commit with A–E grades for: Overall Code Quality, Architecture, Security, Performance, Maintainability. Include key issues, recommendations, overall grade and a footer with 'Generated: YYYY-MM-DD'. Output only HTML (report.html) in the docs folder. You can take docs/report.html as a reference example."
+          prompt: "You are a Technical Debt auditor. Analysis the code and pipelines in this ${{github.workspace}} folder and Generate a HTML  index.html file for this repo commit with A–E grades for: Overall Code Quality, Architecture, Security, Performance, Maintainability. Include key issues, recommendations, overall grade and a footer with 'Generated: YYYY-MM-DD'. You can take docs/report.html as a reference example."
 
       - name: Print response
         run: echo "$response"
