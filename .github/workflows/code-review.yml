@@ -39,11 +39,10 @@ jobs:
         env:
           response: ${{ steps.model.outputs.response }}
 
-      - name: Save response to file
+      - name: Extract HTML and Save to File
         run: |
-          # This awk command is updated to start printing when it sees either <!DOCTYPE html> or <html>,
-          # ensuring the doctype is included in the final file.
-          echo "${{ steps.model.outputs.response }}" | awk 'tolower($0) ~ /<!doctype html>|<html>/ {p=1} p; /<\/html>/ {p=0}' > docs/index.html
+          # This command finds the ```html block and extracts only the content inside.
+          echo "${{ steps.model.outputs.response }}" | awk '/^```html$/{p=1; next} /^```$/{p=0} p' > docs/index.html
         
       - name: Check Content
         run: |
