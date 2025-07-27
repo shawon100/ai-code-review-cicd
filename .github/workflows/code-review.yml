@@ -32,7 +32,7 @@ jobs:
         id: model
         with:
           model: deepseek-r1:latest
-          prompt: "You are a Technical Debt auditor. Analysis all of the codes of this folder and Generate a HTML  index.html file for this repo with A–E grades for: Overall Code Quality, Architecture, Security, Performance, Maintainability. Include key issues, recommendations, overall grade and a footer with 'Generated: YYYY-MM-DD'. Output only HTML (report.html) in the docs folder."
+          prompt: "You are a Technical Debt auditor. Analysis the code and pipelines in this ${{github.workspace}} folder and Generate a HTML  index.html file for this repo commit with A–E grades for: Overall Code Quality, Architecture, Security, Performance, Maintainability. Include key issues, recommendations, overall grade and a footer with 'Generated: YYYY-MM-DD'. Output only HTML (report.html) in the docs folder. You can take docs/report.html as a reference example."
 
       - name: Print response
         run: echo "$response"
@@ -41,13 +41,14 @@ jobs:
 
       - name: Save response to file
         run: |
-          echo "${{ steps.model.outputs.response }}"
-          #extract only html code from response and save it to docs/index.html 
-          echo "${{ steps.model.outputs.response }}" | sed -n 's/.*<html>\(.*\)<\/html>.*/\1/p' > docs/index.html
+          # This awk command is updated to start printing when it sees either <!DOCTYPE html> or <html>,
+          # ensuring the doctype is included in the final file.
+          echo "${{ steps.model.outputs.response }}" | awk 'tolower($0) ~ /<!doctype html>|<html>/ {p=1} p; /<\/html>/ {p=0}' > docs/index.html
         
       - name: Check Content
         run: |
           ls
+          cat docs/index.html
           ls docs
 
       - name: Upload artifact
