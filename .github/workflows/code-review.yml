@@ -40,9 +40,12 @@ jobs:
           response: ${{ steps.model.outputs.response }}
 
       - name: Save response to file
-        run: echo "${{ steps.model.outputs.response }}" > docs/index.html
+        run: |
+          echo "${{ steps.model.outputs.response }}"
+          #extract only html code from response and save it to docs/index.html 
+          echo "${{ steps.model.outputs.response }}" | sed -n 's/.*<html>\(.*\)<\/html>.*/\1/p' > docs/index.html
         
-      - name: Copy report to dist
+      - name: Check Content
         run: |
           ls
           ls docs
