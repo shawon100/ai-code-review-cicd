@@ -42,8 +42,8 @@ jobs:
       - name: Extract HTML and Save to File
         run: |
           # This command finds a ``` block and extracts only the content inside.
-          echo "${{ steps.model.outputs.response }}" | awk '/```/{p=!p; next} p' > docs/index.html
-        
+          echo '${{ steps.model.outputs.response }}' | awk 'BEGIN {inblock=0} /```/ {inblock=1-inblock; next} inblock' > docs/index.html        
+     
       - name: Check Content
         run: |
           ls
