@@ -27,12 +27,36 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
+      - name: Collect code files into one prompt file
+        run: |
+          mkdir -p temp_prompt
+          find . -type f \( -name "*.py" -o -name "*.js" -o -name "*.yml" -o -name "*.yaml" -o -name "*.json" -o -name "*.ts" -o -name "*.java" \) ! -path "./.git/*" ! -path "./docs/*" -exec bash -c 'echo -e "\n--- FILE: $1 ---\n" >> temp_prompt/all_code.txt && cat "$1" >> temp_prompt/all_code.txt' bash {} \;
+
+      - name: Read prompt file into variable
+        id: build_prompt
+        run: |
+          prompt_file=$(cat temp_prompt/all_code.txt)
+          echo "PROMPT<<EOF" >> $GITHUB_ENV
+          echo "$prompt_file" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
       - name: Generate technical debt report
         uses: ai-action/ollama-action@v1
         id: model
         with:
           model: deepseek-r1:latest
-          prompt: "You are a Technical Debt auditor. Analysis the code and pipelines in this ${{github.workspace}} folder and Generate a HTML  index.html file for this repo commit with A–E grades for: Overall Code Quality, Architecture, Security, Performance, Maintainability. Include key issues, recommendations, overall grade and a footer with 'Generated: YYYY-MM-DD'. You can take docs/report.html as a reference example."
+          prompt: |
+            You are a Technical Debt auditor. Analyze the following code and generate a `index.html` report with A–E grades for: Overall Code Quality, Architecture, Security, Performance, Maintainability. Include key issues, recommendations, and an overall grade. Footer: 'Generated: ${{ github.run_started_at }}'.
+
+            ${{ env.PROMPT }}
+
+
+      # - name: Generate technical debt report
+      #   uses: ai-action/ollama-action@v1
+      #   id: model
+      #   with:
+      #     model: deepseek-r1:latest
+      #     prompt: "You are a Technical Debt auditor. Analysis the code and pipelines in this ${{github.workspace}} folder and Generate a HTML  index.html file for this repo commit with A–E grades for: Overall Code Quality, Architecture, Security, Performance, Maintainability. Include key issues, recommendations, overall grade and a footer with 'Generated: YYYY-MM-DD'. You can take docs/report.html as a reference example."
 
       - name: Print response
         run: echo "$response"
@@ -45,7 +69,7 @@ jobs:
           echo "$response" | awk 'BEGIN {inblock=0} /```/ {inblock=1-inblock; next} inblock' > docs/index.html        
         env:
           response: ${{ steps.model.outputs.response }}
-          
+
       - name: Check Content
         run: |
           ls
