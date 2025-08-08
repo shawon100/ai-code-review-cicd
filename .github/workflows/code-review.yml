@@ -44,7 +44,7 @@ jobs:
         uses: ai-action/ollama-action@v1
         id: model
         with:
-          model: deepseek-r1:latest
+          model: gpt-oss:latest
           prompt: |
             You are a Technical Debt auditor. Analyze the following code and generate a `index.html` report with A–E grades for: Overall Code Quality, Architecture, Security, Performance, Maintainability. Include key issues, recommendations, and an overall grade. Footer: 'Generated: ${{ github.run_started_at }}'.
 
